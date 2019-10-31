@@ -1,0 +1,87 @@
+﻿
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous">
+</script>
+@*Yukarıda JQuery kütüphanesi projeye dahil edilmiştir.*@
+
+<input type="button" value="Token Al" onclick="getToken();" />
+<br />
+<input type="button" value="Value Al" onclick="getValues();" />
+<br />
+<input type="text" value="" id="Token" />
+<br />
+<input type="button" value="Verileri Sunucuya Gönder" onclick="sendUsersToServer();" />
+<hr />
+<br />
+<input type="button" value="User Al" onclick="getUsers();" />
+<br />
+<p><strong>ÖNEMLİ:</strong>JWT server projesini başlatmadan önce her iki projenin localhost portlarının farklı olduğundan emin olun.</p>
+
+<script>
+    var users = null;
+    window.Token = null;
+
+    function getToken() {
+        $.ajax({
+            type: 'POST',
+            url: 'http://test-jwt.hazir.net/users/authenticate',
+            data: '{"username":"test","password":"123456"}',
+            contentType: 'application/json',
+            success: function (resultData) {
+                window.Token = resultData.token;
+                $('#Token').val(resultData.token);
+            },
+            error: function (resultData) {
+                console.log(resultData);
+            }
+        });
+    }
+    function getValues() {
+        $.ajax({
+            type: 'GET',
+            url: 'http://test-jwt.hazir.net/users/',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "Bearer " + window.Token);
+            },
+            data: {},
+            contentType: 'application/json',
+            success: function (data) {
+                users = data;
+                console.log(data);
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+    function getUsers() {
+        $.ajax({
+            type: 'GET',
+            url: 'http://localhost:5004/api/values',
+            data: {},
+            contentType: 'application/json',
+            success: function (data) {
+                users = data;
+                console.log("users", data);
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+    function sendUsersToServer() {
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:5004/api/values',
+            data: JSON.stringify(users),
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+</script>
